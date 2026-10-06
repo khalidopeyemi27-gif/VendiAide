@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "npx tsx src/__tests__/conversational-state-engine.test.ts && npx tsx src/__tests__/onboarding-and-greeting.test.ts && npx tsx src/__tests__/order-confirmation-card.test.ts && npx tsx src/__tests__/pidgin-language-consistency.test.ts && npx tsx src/__tests__/phrase-level-pidgin-detection.test.ts && npx tsx src/__tests__/language-authorization-separation.test.ts && npx tsx src/__tests__/pidgin-response-consistency.test.ts && npx tsx src/__tests__/signal-suppression-and-strict-matching.test.ts && npx tsx src/__tests__/discount-inquiry.test.ts && npx tsx src/__tests__/comprehensive-intent-safety.test.ts && npx tsx src/__tests__/conversation-c.test.ts"
+    "test": "npx tsx src/__tests__/conversational-state-engine.test.ts && npx tsx src/__tests__/onboarding-and-greeting.test.ts && npx tsx src/__tests__/order-confirmation-card.test.ts && npx tsx src/__tests__/pidgin-language-consistency.test.ts && npx tsx src/__tests__/phrase-level-pidgin-detection.test.ts && npx tsx src/__tests__/language-authorization-separation.test.ts && npx tsx src/__tests__/pidgin-response-consistency.test.ts && npx tsx src/__tests__/signal-suppression-and-strict-matching.test.ts && npx tsx src/__tests__/discount-inquiry.test.ts && npx tsx src/__tests__/comprehensive-intent-safety.test.ts && npx tsx src/__tests__/conversation-c.test.ts && npx tsx src/__tests__/reference-library.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.2",

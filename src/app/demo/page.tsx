@@ -16,6 +16,7 @@ import {
   Building2,
   ChevronRight,
   TrendingUp,
+  BookOpen,
 } from 'lucide-react';
 import {
   createInitialDemoState,
@@ -24,6 +25,7 @@ import {
   DEMO_PUBLIC_PRODUCTS as CUSTOM_CATALOG,
   getVendorDeliveryCoverage,
 } from '@/lib/demo/demo-engine';
+import { observeDemoInteraction } from '@/lib/reference-library/observer';
 import { formatNaira } from '@/lib/utils/formatters';
 import { OrderConfirmationCard } from '@/components/demo/OrderConfirmationCard';
 
@@ -53,7 +55,23 @@ export default function PublicDemoPage() {
     setIsTyping(true);
 
     setTimeout(() => {
-      setDemoState((currentState) => processDemoMessage(currentState, text).updatedState);
+      setDemoState((currentState) => {
+        const result = processDemoMessage(currentState, text);
+        // Non-intrusive reference observer
+        observeDemoInteraction({
+          conversationId: currentState.sessionId || 'demo_session_default',
+          customerMessage: text,
+          aiResponse: result.responseText,
+          intent: result.intent,
+          detectedLanguage: result.updatedState.detectedLanguage || 'English',
+          activeProduct: CUSTOM_CATALOG.find((p) => p.id === result.updatedState.activeDraft?.productId)?.name || null,
+          draftStatus: result.updatedState.activeDraft?.status || 'EMPTY',
+          authorized: Boolean(result.updatedState.activeDraft?.authorized),
+          orderCreated: result.updatedState.orders.length > currentState.orders.length,
+          totalAmount: result.updatedState.orders[0]?.totalNaira || 0,
+        });
+        return result.updatedState;
+      });
       setIsTyping(false);
     }, 400);
   };
@@ -187,6 +205,15 @@ export default function PublicDemoPage() {
               <RotateCcw className="h-3.5 w-3.5" />
               <span>Reset Demo</span>
             </button>
+
+            <Link
+              href="/demo/references"
+              className="flex items-center gap-1.5 rounded-xl border border-slate-300 py-1.5 px-3 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+              title="View Conversation Reference Library"
+            >
+              <BookOpen className="h-3.5 w-3.5 text-emerald-600" />
+              <span>References</span>
+            </Link>
 
             <Link
               href="/signup"
