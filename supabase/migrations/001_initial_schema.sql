@@ -1,7 +1,6 @@
--- VendorPulse AI: Database Schema Migration
--- Includes all 15 multi-tenant tables with Indexes, Foreign Keys, Unique Constraints, and Row Level Security (RLS) policies.
+-- VendiAide AI: Database Schema Migration (Updated for Phase 3)
+-- Includes all 15 multi-tenant tables, indexes, RLS policies, and onboarding RPC transaction.
 
--- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- 1. USERS TABLE
@@ -26,7 +25,8 @@ CREATE TABLE IF NOT EXISTS businesses (
   instagram_handle TEXT,
   whatsapp_number TEXT,
   delivery_info JSONB DEFAULT '{"fee_lagos": 2500, "fee_interstate": 5000, "policy": "Delivery within 24-48 hours in Lagos, 3-5 days interstate."}'::jsonb,
-  payment_info JSONB DEFAULT '{"bank_name": "Kuda Bank", "account_number": "1234567890", "account_name": "Vendor Pulse Fashion"}'::jsonb,
+  payment_info JSONB DEFAULT '{"bank_name": "", "account_number": "", "account_name": ""}'::jsonb,
+  onboarding_completed BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -38,8 +38,8 @@ CREATE INDEX IF NOT EXISTS idx_businesses_slug ON businesses(slug);
 CREATE TABLE IF NOT EXISTS subscriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id UUID NOT NULL UNIQUE REFERENCES businesses(id) ON DELETE CASCADE,
-  plan TEXT NOT NULL DEFAULT 'starter', -- 'founding_10' | 'starter' | 'growth'
-  status TEXT NOT NULL DEFAULT 'active', -- 'active' | 'past_due' | 'canceled' | 'trialing'
+  plan TEXT NOT NULL DEFAULT 'founding_10', -- 'founding_10' | 'starter' | 'growth'
+  status TEXT NOT NULL DEFAULT 'active',
   started_at TIMESTAMPTZ DEFAULT NOW(),
   expires_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW()
@@ -51,7 +51,7 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_business ON subscriptions(business_
 CREATE TABLE IF NOT EXISTS business_usage_stats (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
-  month_year TEXT NOT NULL, -- Format: 'YYYY-MM'
+  month_year TEXT NOT NULL,
   conversations_count INT DEFAULT 0,
   ai_tokens_used INT DEFAULT 0,
   orders_count INT DEFAULT 0,
@@ -71,8 +71,8 @@ CREATE TABLE IF NOT EXISTS products (
   in_stock BOOLEAN DEFAULT TRUE,
   category TEXT,
   image_url TEXT,
-  attributes JSONB DEFAULT '{"sizes":["M","L","XL"], "colors":["Black","White"]}'::jsonb,
-  status TEXT DEFAULT 'active', -- 'active' | 'archived'
+  attributes JSONB DEFAULT '{"sizes":["M","L","XL"], "colors":["Black"]}'::jsonb,
+  status TEXT DEFAULT 'active',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -95,9 +95,9 @@ CREATE INDEX IF NOT EXISTS idx_faqs_business ON faqs(business_id);
 CREATE TABLE IF NOT EXISTS ai_settings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id UUID UNIQUE NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
-  assistant_name TEXT DEFAULT 'Sales Assistant',
-  tone TEXT DEFAULT 'friendly_professional', -- 'friendly_professional' | 'warm_nigerian_pinyin' | 'formal'
-  greeting_message TEXT DEFAULT 'Hello! Welcome to our fashion store. How can I help you today?',
+  assistant_name TEXT DEFAULT 'Aisha',
+  tone TEXT DEFAULT 'friendly_professional',
+  greeting_message TEXT DEFAULT 'Welcome to our store! How can I help you choose your outfit today?',
   fallback_message TEXT DEFAULT 'Thanks for reaching out! Our sales team will get back to you shortly.',
   auto_escalate_human BOOLEAN DEFAULT TRUE,
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -108,9 +108,9 @@ CREATE TABLE IF NOT EXISTS customers (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
   name TEXT,
-  channel TEXT NOT NULL DEFAULT 'whatsapp', -- 'whatsapp' | 'instagram' | 'web_demo'
+  channel TEXT NOT NULL DEFAULT 'whatsapp',
   channel_user_id TEXT NOT NULL,
-  phone_number TEXT, -- Nullable for channel flexibility
+  phone_number TEXT,
   notes TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(business_id, channel, channel_user_id)
@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS conversations (
   customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
   channel TEXT NOT NULL DEFAULT 'whatsapp',
   last_intent TEXT,
-  status TEXT DEFAULT 'ai_active', -- 'ai_active' | 'human_takeover' | 'resolved'
+  status TEXT DEFAULT 'ai_active',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -137,7 +137,7 @@ CREATE TABLE IF NOT EXISTS messages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
   business_id UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
-  sender_type TEXT NOT NULL, -- 'customer' | 'ai' | 'vendor'
+  sender_type TEXT NOT NULL,
   content TEXT NOT NULL,
   intent_detected TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
@@ -152,7 +152,7 @@ CREATE TABLE IF NOT EXISTS leads (
   customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
   conversation_id UUID REFERENCES conversations(id) ON DELETE SET NULL,
   product_interested TEXT,
-  status TEXT DEFAULT 'NEW', -- 'NEW' | 'CONTACTED' | 'INTERESTED' | 'ORDER_PENDING' | 'CONVERTED' | 'LOST'
+  status TEXT DEFAULT 'NEW',
   source TEXT DEFAULT 'whatsapp',
   notes TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -169,8 +169,8 @@ CREATE TABLE IF NOT EXISTS orders (
   conversation_id UUID REFERENCES conversations(id) ON DELETE SET NULL,
   total_amount NUMERIC(12,2) NOT NULL,
   delivery_location TEXT,
-  payment_status TEXT DEFAULT 'UNPAID', -- 'UNPAID' | 'PENDING' | 'PAID' | 'REFUNDED'
-  order_status TEXT DEFAULT 'PENDING',  -- 'PENDING' | 'CONFIRMED' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED'
+  payment_status TEXT DEFAULT 'UNPAID',
+  order_status TEXT DEFAULT 'PENDING',
   notes TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -178,14 +178,14 @@ CREATE TABLE IF NOT EXISTS orders (
 
 CREATE INDEX IF NOT EXISTS idx_orders_business_status ON orders(business_id, order_status, created_at DESC);
 
--- 13. ORDER ITEMS TABLE (HISTORICAL IMMUTABLE SNAPSHOT)
+-- 13. ORDER ITEMS TABLE
 CREATE TABLE IF NOT EXISTS order_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
   product_id UUID REFERENCES products(id) ON DELETE SET NULL,
-  product_name TEXT NOT NULL, -- Historical Snapshot
+  product_name TEXT NOT NULL,
   quantity INT DEFAULT 1,
-  unit_price NUMERIC(12,2) NOT NULL, -- Historical Snapshot
+  unit_price NUMERIC(12,2) NOT NULL,
   size TEXT,
   color TEXT,
   attributes_snapshot JSONB
@@ -201,13 +201,13 @@ CREATE TABLE IF NOT EXISTS follow_ups (
   conversation_id UUID REFERENCES conversations(id) ON DELETE SET NULL,
   reason TEXT NOT NULL,
   scheduled_at TIMESTAMPTZ NOT NULL,
-  status TEXT DEFAULT 'PENDING', -- 'PENDING' | 'COMPLETED' | 'CANCELLED'
+  status TEXT DEFAULT 'PENDING',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_follow_ups_business_status ON follow_ups(business_id, status, scheduled_at ASC);
 
--- 15. AI INTERACTION LOGS TABLE (LEAN AUDIT LOG)
+-- 15. AI INTERACTION LOGS TABLE
 CREATE TABLE IF NOT EXISTS ai_interaction_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
@@ -230,12 +230,10 @@ CREATE INDEX IF NOT EXISTS idx_ai_logs_business ON ai_interaction_logs(business_
 -- ROW LEVEL SECURITY (RLS) POLICIES
 --------------------------------------------------------------------------------
 
--- Helper function to get authenticated user's business ID
 CREATE OR REPLACE FUNCTION auth.current_business_id() RETURNS UUID AS $$
   SELECT id FROM businesses WHERE owner_id = auth.uid() LIMIT 1;
 $$ LANGUAGE sql STABLE SECURITY DEFINER;
 
--- Enable RLS on all business-owned tables
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE businesses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
@@ -252,49 +250,107 @@ ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE follow_ups ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_interaction_logs ENABLE ROW LEVEL SECURITY;
 
--- Users policy
 CREATE POLICY users_self_access ON users FOR ALL USING (id = auth.uid());
-
--- Businesses policy
 CREATE POLICY business_owner_access ON businesses FOR ALL USING (owner_id = auth.uid());
-
--- Subscriptions policy
 CREATE POLICY subscriptions_tenant_access ON subscriptions FOR ALL USING (business_id = auth.current_business_id());
-
--- Usage stats policy
 CREATE POLICY usage_stats_tenant_access ON business_usage_stats FOR ALL USING (business_id = auth.current_business_id());
-
--- Products policy
 CREATE POLICY products_tenant_access ON products FOR ALL USING (business_id = auth.current_business_id());
-
--- FAQs policy
 CREATE POLICY faqs_tenant_access ON faqs FOR ALL USING (business_id = auth.current_business_id());
-
--- AI Settings policy
 CREATE POLICY ai_settings_tenant_access ON ai_settings FOR ALL USING (business_id = auth.current_business_id());
-
--- Customers policy
 CREATE POLICY customers_tenant_access ON customers FOR ALL USING (business_id = auth.current_business_id());
-
--- Conversations policy
 CREATE POLICY conversations_tenant_access ON conversations FOR ALL USING (business_id = auth.current_business_id());
-
--- Messages policy
 CREATE POLICY messages_tenant_access ON messages FOR ALL USING (business_id = auth.current_business_id());
-
--- Leads policy
 CREATE POLICY leads_tenant_access ON leads FOR ALL USING (business_id = auth.current_business_id());
-
--- Orders policy
 CREATE POLICY orders_tenant_access ON orders FOR ALL USING (business_id = auth.current_business_id());
-
--- Order Items policy (joined via orders)
 CREATE POLICY order_items_tenant_access ON order_items FOR ALL USING (
   order_id IN (SELECT id FROM orders WHERE business_id = auth.current_business_id())
 );
-
--- Follow-ups policy
 CREATE POLICY follow_ups_tenant_access ON follow_ups FOR ALL USING (business_id = auth.current_business_id());
-
--- AI Interaction Logs policy
 CREATE POLICY ai_logs_tenant_access ON ai_interaction_logs FOR ALL USING (business_id = auth.current_business_id());
+
+--------------------------------------------------------------------------------
+-- ATOMIC ONBOARDING TRANSACTION RPC
+--------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION complete_business_onboarding(
+  p_business_name TEXT,
+  p_slug TEXT,
+  p_category TEXT,
+  p_whatsapp_number TEXT,
+  p_location TEXT,
+  p_delivery_info JSONB,
+  p_payment_info JSONB,
+  p_product_name TEXT,
+  p_product_price NUMERIC,
+  p_product_sizes JSONB,
+  p_product_colors JSONB,
+  p_product_in_stock BOOLEAN,
+  p_assistant_name TEXT,
+  p_assistant_tone TEXT,
+  p_greeting_message TEXT
+) RETURNS JSONB AS $$
+DECLARE
+  v_user_id UUID := auth.uid();
+  v_business_id UUID;
+  v_product_id UUID;
+  v_ai_settings_id UUID;
+  v_sub_id UUID;
+BEGIN
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'Unauthenticated request';
+  END IF;
+
+  -- 1. Create or Update Business
+  INSERT INTO businesses (
+    owner_id, name, slug, industry_type, category, location, whatsapp_number, delivery_info, payment_info, onboarding_completed
+  ) VALUES (
+    v_user_id, p_business_name, p_slug, 'fashion', p_category, p_location, p_whatsapp_number, p_delivery_info, p_payment_info, TRUE
+  )
+  ON CONFLICT (slug) DO UPDATE SET
+    name = EXCLUDED.name,
+    category = EXCLUDED.category,
+    location = EXCLUDED.location,
+    whatsapp_number = EXCLUDED.whatsapp_number,
+    delivery_info = EXCLUDED.delivery_info,
+    payment_info = EXCLUDED.payment_info,
+    onboarding_completed = TRUE,
+    updated_at = NOW()
+  RETURNING id INTO v_business_id;
+
+  -- 2. Create Initial Product
+  INSERT INTO products (
+    business_id, name, price_ngn, in_stock, category, attributes
+  ) VALUES (
+    v_business_id, p_product_name, p_product_price, p_product_in_stock, p_category,
+    jsonb_build_object('sizes', p_product_sizes, 'colors', p_product_colors)
+  ) RETURNING id INTO v_product_id;
+
+  -- 3. Create AI Settings
+  INSERT INTO ai_settings (
+    business_id, assistant_name, tone, greeting_message
+  ) VALUES (
+    v_business_id, COALESCE(p_assistant_name, 'Aisha'), COALESCE(p_assistant_tone, 'friendly_professional'), COALESCE(p_greeting_message, 'Welcome to our store! How can I help you choose your outfit today?')
+  )
+  ON CONFLICT (business_id) DO UPDATE SET
+    assistant_name = EXCLUDED.assistant_name,
+    tone = EXCLUDED.tone,
+    greeting_message = EXCLUDED.greeting_message,
+    updated_at = NOW()
+  RETURNING id INTO v_ai_settings_id;
+
+  -- 4. Create Initial Subscription
+  INSERT INTO subscriptions (
+    business_id, plan, status
+  ) VALUES (
+    v_business_id, 'founding_10', 'active'
+  )
+  ON CONFLICT (business_id) DO NOTHING
+  RETURNING id INTO v_sub_id;
+
+  RETURN jsonb_build_object(
+    'success', TRUE,
+    'business_id', v_business_id,
+    'product_id', v_product_id,
+    'ai_settings_id', v_ai_settings_id
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;

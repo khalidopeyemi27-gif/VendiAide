@@ -8,6 +8,8 @@ import {
   Message,
   Lead,
   Order,
+  OrderItem,
+  FollowUp,
   Subscription,
   BusinessUsageStats,
   SUBSCRIPTION_CONVERSATION_LIMITS,
@@ -32,10 +34,11 @@ export const DEMO_BUSINESS: Business = {
     policy: 'Standard delivery takes 24-48 hours in Lagos, and 3-5 working days across Nigeria.',
   },
   payment_info: {
-    bank_name: 'Kuda Bank',
-    account_number: '1234567890',
-    account_name: 'VoguePulse Fashion NG',
+    bank_name: 'Secure Bank Partner',
+    account_number: '0000000000',
+    account_name: 'VoguePulse Merchant',
   },
+  onboarding_completed: true,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
 };
@@ -93,6 +96,34 @@ export const DEMO_PRODUCTS: Product[] = [
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
+  {
+    id: 'prod-4',
+    business_id: 'demo-biz-1',
+    name: 'Leather Handbag',
+    description: 'Structure genuine leather shoulder handbag with gold zipper accents.',
+    price_ngn: 28000,
+    in_stock: true,
+    category: 'Bags & Accessories',
+    image_url: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80',
+    attributes: { sizes: [], colors: ['Black', 'Brown'] },
+    status: 'active',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'prod-5',
+    business_id: 'demo-biz-1',
+    name: 'One-Size Chiffon Hijab',
+    description: 'Lightweight breathable chiffon hijab wrap suitable for all occasions.',
+    price_ngn: 8000,
+    in_stock: true,
+    category: 'Abaya & Hijab',
+    image_url: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80',
+    attributes: { sizes: [], colors: [] },
+    status: 'active',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
 ];
 
 export const DEMO_FAQS: FAQ[] = [
@@ -100,7 +131,7 @@ export const DEMO_FAQS: FAQ[] = [
     id: 'faq-1',
     business_id: 'demo-biz-1',
     question: 'How do I pay for my order?',
-    answer: 'We accept direct bank transfers to Kuda Bank: Account Number 1234567890 (Account Name: VoguePulse Fashion NG). Please send receipt after transfer!',
+    answer: 'Official payment details and bank transfer instructions are provided during order checkout. Send your transfer receipt to confirm your order!',
     category: 'payment',
     created_at: new Date().toISOString(),
   },
@@ -125,6 +156,240 @@ export const DEMO_AI_SETTINGS: AISettings = {
   updated_at: new Date().toISOString(),
 };
 
+// Initial Seed Data for Phase 7 Dashboard CRM
+export const DEMO_CUSTOMERS: Customer[] = [
+  {
+    id: 'cust-1',
+    business_id: 'demo-biz-1',
+    name: 'Bisi Adebayo',
+    channel: 'whatsapp',
+    channel_user_id: '2348031234567',
+    phone_number: '+2348031234567',
+    notes: 'VIP Customer interested in Abayas',
+    created_at: new Date(Date.now() - 3600000 * 5).toISOString(),
+  },
+  {
+    id: 'cust-2',
+    business_id: 'demo-biz-1',
+    name: 'Chioma Eze',
+    channel: 'web_demo',
+    channel_user_id: 'web_demo_882',
+    phone_number: '+2348029876543',
+    notes: 'Inquired about size 42 sneakers',
+    created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+  },
+  {
+    id: 'cust-3',
+    business_id: 'demo-biz-1',
+    name: 'Amina Bello',
+    channel: 'instagram',
+    channel_user_id: '@amina_bello',
+    phone_number: '+2348051112223',
+    notes: 'Instagram DM inquiry for Hoodies',
+    created_at: new Date(Date.now() - 3600000 * 12).toISOString(),
+  },
+];
+
+export const DEMO_CONVERSATIONS: Conversation[] = [
+  {
+    id: 'conv-1',
+    business_id: 'demo-biz-1',
+    customer_id: 'cust-1',
+    channel: 'whatsapp',
+    last_intent: 'PURCHASE_INTENT',
+    status: 'ai_active',
+    created_at: new Date(Date.now() - 3600000 * 5).toISOString(),
+    updated_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+  },
+  {
+    id: 'conv-2',
+    business_id: 'demo-biz-1',
+    customer_id: 'cust-2',
+    channel: 'web_demo',
+    last_intent: 'HUMAN_ESCALATION',
+    status: 'human_takeover',
+    created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+    updated_at: new Date(Date.now() - 3600000 * 1).toISOString(),
+  },
+];
+
+export const DEMO_MESSAGES: Map<string, Message[]> = new Map([
+  [
+    'conv-1',
+    [
+      {
+        id: 'msg-1-1',
+        conversation_id: 'conv-1',
+        business_id: 'demo-biz-1',
+        sender_type: 'customer',
+        content: 'Hi, do you have the Black Velvet Abaya in size L?',
+        intent_detected: 'AVAILABILITY_INQUIRY',
+        created_at: new Date(Date.now() - 3600000 * 5).toISOString(),
+      },
+      {
+        id: 'msg-1-2',
+        conversation_id: 'conv-1',
+        business_id: 'demo-biz-1',
+        sender_type: 'ai',
+        content: 'Yes! The Black Velvet Abaya is in stock for ₦35,000 in sizes M, L, and XL.',
+        intent_detected: 'AVAILABILITY_INQUIRY',
+        created_at: new Date(Date.now() - 3600000 * 4.9).toISOString(),
+      },
+      {
+        id: 'msg-1-3',
+        conversation_id: 'conv-1',
+        business_id: 'demo-biz-1',
+        sender_type: 'customer',
+        content: 'I want to buy size L. Delivery is to Ikeja, Lagos.',
+        intent_detected: 'PURCHASE_INTENT',
+        created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+      },
+      {
+        id: 'msg-1-4',
+        conversation_id: 'conv-1',
+        business_id: 'demo-biz-1',
+        sender_type: 'ai',
+        content: 'Awesome! Your order for the Black Velvet Abaya (Size L) at ₦37,500 (including ₦2,500 Lagos shipping) has been logged. The vendor will share official payment instructions on WhatsApp!',
+        intent_detected: 'PURCHASE_INTENT',
+        created_at: new Date(Date.now() - 3600000 * 3.9).toISOString(),
+      },
+    ],
+  ],
+  [
+    'conv-2',
+    [
+      {
+        id: 'msg-2-1',
+        conversation_id: 'conv-2',
+        business_id: 'demo-biz-1',
+        sender_type: 'customer',
+        content: 'Do you have size 42 of the White Premium Sneakers?',
+        intent_detected: 'AVAILABILITY_INQUIRY',
+        created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+      },
+      {
+        id: 'msg-2-2',
+        conversation_id: 'conv-2',
+        business_id: 'demo-biz-1',
+        sender_type: 'ai',
+        content: 'Yes! Size 42 of the White Premium Sneakers is available in stock for ₦45,000. Would you like to place an order for delivery?',
+        intent_detected: 'AVAILABILITY_INQUIRY',
+        created_at: new Date(Date.now() - 3600000 * 1.9).toISOString(),
+      },
+      {
+        id: 'msg-2-3',
+        conversation_id: 'conv-2',
+        business_id: 'demo-biz-1',
+        sender_type: 'customer',
+        content: 'Can I speak to the human owner of this shop right now?',
+        intent_detected: 'HUMAN_ESCALATION',
+        created_at: new Date(Date.now() - 3600000 * 1).toISOString(),
+      },
+      {
+        id: 'msg-2-4',
+        conversation_id: 'conv-2',
+        business_id: 'demo-biz-1',
+        sender_type: 'ai',
+        content: 'Thanks for reaching out! I have alerted the vendor team at VoguePulse. A human representative will take over this conversation shortly.',
+        intent_detected: 'HUMAN_ESCALATION',
+        created_at: new Date(Date.now() - 3600000 * 0.9).toISOString(),
+      },
+    ],
+  ],
+]);
+
+export const DEMO_LEADS: Lead[] = [
+  {
+    id: 'lead-1',
+    business_id: 'demo-biz-1',
+    customer_id: 'cust-1',
+    conversation_id: 'conv-1',
+    product_interested: 'Black Velvet Abaya',
+    status: 'ORDER_PENDING',
+    source: 'whatsapp',
+    notes: 'Size L, Color Black',
+    created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+    updated_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+  },
+  {
+    id: 'lead-2',
+    business_id: 'demo-biz-1',
+    customer_id: 'cust-2',
+    conversation_id: 'conv-2',
+    product_interested: 'White Premium Sneakers',
+    status: 'INTERESTED',
+    source: 'web_demo',
+    notes: 'Checked size 42 stock',
+    created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+    updated_at: new Date(Date.now() - 3600000 * 1).toISOString(),
+  },
+  {
+    id: 'lead-3',
+    business_id: 'demo-biz-1',
+    customer_id: 'cust-3',
+    conversation_id: null,
+    product_interested: 'Black Oversized Hoodie',
+    status: 'NEW',
+    source: 'instagram',
+    notes: 'Inquired on Instagram DM about XL',
+    created_at: new Date(Date.now() - 3600000 * 12).toISOString(),
+    updated_at: new Date(Date.now() - 3600000 * 12).toISOString(),
+  },
+];
+
+export const DEMO_ORDERS: Order[] = [
+  {
+    id: 'ord-1',
+    business_id: 'demo-biz-1',
+    customer_id: 'cust-1',
+    conversation_id: 'conv-1',
+    total_amount: 37500,
+    delivery_location: 'Ikeja, Lagos',
+    payment_status: 'UNPAID',
+    order_status: 'PENDING',
+    notes: 'Item: Black Velvet Abaya, Size: L, Color: Black',
+    created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+    updated_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+  },
+];
+
+export const DEMO_ORDER_ITEMS: OrderItem[] = [
+  {
+    id: 'item-1',
+    order_id: 'ord-1',
+    product_id: 'prod-2',
+    product_name: 'Black Velvet Abaya',
+    quantity: 1,
+    unit_price: 35000,
+    size: 'L',
+    color: 'Black',
+    attributes_snapshot: { size: 'L', color: 'Black' },
+  },
+];
+
+export const DEMO_FOLLOW_UPS: FollowUp[] = [
+  {
+    id: 'followup-1',
+    business_id: 'demo-biz-1',
+    customer_id: 'cust-2',
+    conversation_id: 'conv-2',
+    reason: 'Confirm size 42 sneaker stock and send payment details',
+    scheduled_at: new Date(Date.now() + 86400000).toISOString(),
+    status: 'PENDING',
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 'followup-2',
+    business_id: 'demo-biz-1',
+    customer_id: 'cust-1',
+    conversation_id: 'conv-1',
+    reason: 'Check bank transfer receipt for Abaya order',
+    scheduled_at: new Date(Date.now() + 3600000 * 4).toISOString(),
+    status: 'PENDING',
+    created_at: new Date().toISOString(),
+  },
+];
+
 class MockStore {
   private businesses: Map<string, Business> = new Map([['demo-biz-1', DEMO_BUSINESS]]);
   private subscriptions: Map<string, Subscription> = new Map([['demo-biz-1', DEMO_SUBSCRIPTION]]);
@@ -132,14 +397,21 @@ class MockStore {
   private products: Map<string, Product[]> = new Map([['demo-biz-1', [...DEMO_PRODUCTS]]]);
   private faqs: Map<string, FAQ[]> = new Map([['demo-biz-1', [...DEMO_FAQS]]]);
   private aiSettings: Map<string, AISettings> = new Map([['demo-biz-1', DEMO_AI_SETTINGS]]);
-  private customers: Map<string, Customer[]> = new Map();
-  private conversations: Map<string, Conversation[]> = new Map();
-  private messages: Map<string, Message[]> = new Map();
-  private leads: Map<string, Lead[]> = new Map();
-  private orders: Map<string, Order[]> = new Map();
+  private customers: Map<string, Customer[]> = new Map([['demo-biz-1', [...DEMO_CUSTOMERS]]]);
+  private conversations: Map<string, Conversation[]> = new Map([['demo-biz-1', [...DEMO_CONVERSATIONS]]]);
+  private messages: Map<string, Message[]> = DEMO_MESSAGES;
+  private leads: Map<string, Lead[]> = new Map([['demo-biz-1', [...DEMO_LEADS]]]);
+  private orders: Map<string, Order[]> = new Map([['demo-biz-1', [...DEMO_ORDERS]]]);
+  private orderItems: Map<string, OrderItem[]> = new Map([['ord-1', [...DEMO_ORDER_ITEMS]]]);
+  private followUps: Map<string, FollowUp[]> = new Map([['demo-biz-1', [...DEMO_FOLLOW_UPS]]]);
 
   getBusiness(businessId: string): Business | undefined {
     return this.businesses.get(businessId) || DEMO_BUSINESS;
+  }
+
+  saveBusiness(business: Business): Business {
+    this.businesses.set(business.id, business);
+    return business;
   }
 
   getSubscription(businessId: string): Subscription {
@@ -154,9 +426,9 @@ class MockStore {
         id: `usage-${Date.now()}`,
         business_id: businessId,
         month_year: monthYear,
-        conversations_count: 0,
-        ai_tokens_used: 0,
-        orders_count: 0,
+        conversations_count: 124, // Realistic seed for demo-biz-1
+        ai_tokens_used: 48500,
+        orders_count: 1,
         updated_at: new Date().toISOString(),
       });
     }
@@ -180,15 +452,26 @@ class MockStore {
   }
 
   getProducts(businessId: string): Product[] {
-    return this.products.get(businessId) || DEMO_PRODUCTS;
+    const prods = this.products.get(businessId);
+    if (prods) return prods;
+    if (businessId === DEMO_BUSINESS.id) return DEMO_PRODUCTS;
+    return [];
   }
 
   getFaqs(businessId: string): FAQ[] {
-    return this.faqs.get(businessId) || DEMO_FAQS;
+    const faqs = this.faqs.get(businessId);
+    if (faqs) return faqs;
+    if (businessId === DEMO_BUSINESS.id) return DEMO_FAQS;
+    return [];
   }
 
   getAISettings(businessId: string): AISettings {
-    return this.aiSettings.get(businessId) || DEMO_AI_SETTINGS;
+    return this.aiSettings.get(businessId) || { ...DEMO_AI_SETTINGS, business_id: businessId };
+  }
+
+  saveAISettings(settings: AISettings): AISettings {
+    this.aiSettings.set(settings.business_id, settings);
+    return settings;
   }
 
   getCustomers(businessId: string): Customer[] {
@@ -199,12 +482,36 @@ class MockStore {
     return this.conversations.get(businessId) || [];
   }
 
+  getMessages(conversationId: string): Message[] {
+    return this.messages.get(conversationId) || [];
+  }
+
   getLeads(businessId: string): Lead[] {
     return this.leads.get(businessId) || [];
   }
 
   getOrders(businessId: string): Order[] {
     return this.orders.get(businessId) || [];
+  }
+
+  getOrderItems(orderId: string): OrderItem[] {
+    return this.orderItems.get(orderId) || [];
+  }
+
+  getFollowUps(businessId: string): FollowUp[] {
+    return this.followUps.get(businessId) || [];
+  }
+
+  saveProduct(product: Product): Product {
+    const list = this.products.get(product.business_id) || [];
+    const idx = list.findIndex((p) => p.id === product.id);
+    if (idx >= 0) {
+      list[idx] = { ...list[idx], ...product };
+    } else {
+      list.unshift(product);
+    }
+    this.products.set(product.business_id, list);
+    return product;
   }
 
   saveCustomer(customer: Customer): Customer {
@@ -244,7 +551,7 @@ class MockStore {
     if (idx >= 0) {
       list[idx] = { ...list[idx], ...lead };
     } else {
-      list.push(lead);
+      list.unshift(lead);
     }
     this.leads.set(lead.business_id, list);
     return lead;
@@ -256,10 +563,29 @@ class MockStore {
     if (idx >= 0) {
       list[idx] = { ...list[idx], ...order };
     } else {
-      list.push(order);
+      list.unshift(order);
     }
     this.orders.set(order.business_id, list);
     return order;
+  }
+
+  saveOrderItem(item: OrderItem): OrderItem {
+    const list = this.orderItems.get(item.order_id) || [];
+    list.push(item);
+    this.orderItems.set(item.order_id, list);
+    return item;
+  }
+
+  saveFollowUp(followUp: FollowUp): FollowUp {
+    const list = this.followUps.get(followUp.business_id) || [];
+    const idx = list.findIndex((f) => f.id === followUp.id);
+    if (idx >= 0) {
+      list[idx] = { ...list[idx], ...followUp };
+    } else {
+      list.unshift(followUp);
+    }
+    this.followUps.set(followUp.business_id, list);
+    return followUp;
   }
 }
 

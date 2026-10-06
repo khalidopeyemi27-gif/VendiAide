@@ -1,0 +1,109 @@
+{
+  "timestamp": "2026-09-13T18:10:24.742Z",
+  "targetUrl": "http://127.0.0.1:3000/demo",
+  "totalTests": 10,
+  "passed": 10,
+  "failed": 0,
+  "results": [
+    {
+      "name": "1. Nigerian Pidgin catalog request",
+      "status": "PASSED",
+      "details": {
+        "debugIntent": "CATALOG_INQUIRY",
+        "ordersCount": 0,
+        "authorized": false,
+        "draftStatus": "EMPTY"
+      }
+    },
+    {
+      "name": "2. Pidgin purchase intent (unauthorized)",
+      "status": "PASSED",
+      "details": {
+        "debugIntent": "PURCHASE_INTENT",
+        "ordersCount": 0,
+        "authorized": false,
+        "draftStatus": "CONFIGURING"
+      }
+    },
+    {
+      "name": "3. Size specification L",
+      "status": "PASSED",
+      "details": {
+        "debugIntent": "PURCHASE_INTENT",
+        "ordersCount": 0,
+        "authorized": false,
+        "draftStatus": "CONFIGURING"
+      }
+    },
+    {
+      "name": "4. Location specification Ikeja (READY_FOR_CHECKOUT)",
+      "status": "PASSED",
+      "details": {
+        "debugIntent": "PURCHASE_INTENT",
+        "ordersCount": 0,
+        "authorized": false,
+        "draftStatus": "READY_FOR_CHECKOUT"
+      }
+    },
+    {
+      "name": "5. Discount inquiry read-only safety",
+      "status": "PASSED",
+      "details": {
+        "debugIntent": "DISCOUNT_INQUIRY",
+        "ordersCount": 0,
+        "authorized": false,
+        "draftStatus": "READY_FOR_CHECKOUT"
+      }
+    },
+    {
+      "name": "6. Explicit order confirmation (yes do am)",
+      "status": "PASSED",
+      "details": {
+        "debugIntent": "EXPLICIT_ORDER_CONFIRMATION",
+        "ordersCount": 1,
+        "authorized": true,
+        "draftStatus": "EMPTY"
+      }
+    },
+    {
+      "name": "7. Idempotent duplicate confirmation",
+      "status": "PASSED",
+      "details": {
+        "debugIntent": "EXPLICIT_ORDER_CONFIRMATION",
+        "ordersCount": 1,
+        "authorized": true,
+        "draftStatus": "EMPTY"
+      }
+    },
+    {
+      "name": "8. Informational product question read-only preservation",
+      "status": "PASSED",
+      "details": {
+        "debugIntent": "PRODUCT_INQUIRY",
+        "ordersCount": 1,
+        "authorized": true,
+        "draftStatus": "EMPTY"
+      }
+    },
+    {
+      "name": "9. Explicit product switch to sneakers",
+      "status": "PASSED",
+      "details": {
+        "debugIntent": "PURCHASE_INTENT",
+        "ordersCount": 1,
+        "authorized": false,
+        "draftStatus": "CONFIGURING"
+      }
+    },
+    {
+      "name": "10. Order cancellation and state reset",
+      "status": "PASSED",
+      "details": {
+        "debugIntent": "CANCEL",
+        "ordersCount": 0,
+        "authorized": false,
+        "draftStatus": "EMPTY"
+      }
+    }
+  ]
+}

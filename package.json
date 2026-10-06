@@ -1,12 +1,14 @@
 {
-  "name": "vendorpulse-ai",
+  "name": "vendiaide-ai",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "npx tsx src/__tests__/conversational-state-engine.test.ts && npx tsx src/__tests__/onboarding-and-greeting.test.ts && npx tsx src/__tests__/order-confirmation-card.test.ts && npx tsx src/__tests__/pidgin-language-consistency.test.ts && npx tsx src/__tests__/phrase-level-pidgin-detection.test.ts && npx tsx src/__tests__/language-authorization-separation.test.ts && npx tsx src/__tests__/pidgin-response-consistency.test.ts && npx tsx src/__tests__/signal-suppression-and-strict-matching.test.ts && npx tsx src/__tests__/discount-inquiry.test.ts && npx tsx src/__tests__/comprehensive-intent-safety.test.ts && npx tsx src/__tests__/conversation-c.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.2",
@@ -26,6 +28,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
+    "playwright": "^1.63.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

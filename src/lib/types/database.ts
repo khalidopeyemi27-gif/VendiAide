@@ -1,4 +1,4 @@
-// Database Entity Types for VendorPulse AI (Multi-Tenant Architecture)
+// Database Entity Types for VendiAide (Multi-Tenant Architecture)
 
 export type IndustryType = 'fashion' | 'restaurant' | 'real_estate';
 export type ChannelType = 'whatsapp' | 'instagram' | 'web_demo';
@@ -51,6 +51,7 @@ export interface Business {
   whatsapp_number: string | null;
   delivery_info: DeliveryInfo;
   payment_info: PaymentInfo;
+  onboarding_completed: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -103,7 +104,7 @@ export interface AISettings {
   id: string;
   business_id: string;
   assistant_name: string;
-  tone: 'friendly_professional' | 'warm_nigerian_pinyin' | 'formal';
+  tone: 'friendly_professional' | 'warm_nigerian_pidgin' | 'warm_nigerian' | 'formal';
   greeting_message: string;
   fallback_message: string;
   auto_escalate_human: boolean;
@@ -205,6 +206,8 @@ export interface AIInteractionLog {
   latency_ms: number;
   safety_result: string;
   escalated: boolean;
+  source?: 'gemini' | 'fallback';
+  fallback_reason?: string | null;
   created_at: string;
 }
 

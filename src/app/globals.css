@@ -1,8 +1,22 @@
 @import "tailwindcss";
 
+/* 
+ * VendiAide — Anti-Vibe-Coded Light Restrained Design System
+ * 
+ * Governing Principle: "VendiAide should show the work it actually performs, 
+ * not decorate the interface with generic AI aesthetics."
+ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #ffffff;      /* Pure white container background */
+  --surface: #f9fafb;         /* Crisp card surface (gray-50) */
+  --surface-hover: #f3f4f6;   /* Subdued hover surface (gray-100) */
+  --border: #e5e7eb;          /* Subdued 1px border (gray-200) */
+  --foreground: #111827;      /* Primary text (gray-900) */
+  --foreground-muted: #6b7280;/* Secondary text (gray-500) */
+  --primary: #059669;         /* Emerald 600 primary brand accent */
+  --primary-hover: #047857;   /* Emerald 700 hover state */
+  --primary-subtle: #ecfdf5;  /* Emerald 50 background badge */
 }
 
 @theme inline {
@@ -12,15 +26,17 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+}
+
+input, select, textarea {
+  color: #111827 !important;
+  background-color: #ffffff !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #9ca3af !important;
 }

@@ -2,6 +2,7 @@ import { mockStore } from '../db/mock-store';
 import { supabase } from '../db/client';
 import { getCurrentMonthYear } from '../utils/formatters';
 import { SUBSCRIPTION_CONVERSATION_LIMITS, SubscriptionPlan } from '../types/database';
+import { env } from '../env';
 
 export interface UsageCheckResult {
   allowed: boolean;
@@ -13,41 +14,44 @@ export interface UsageCheckResult {
 
 export async function checkAndEnforceUsage(businessId: string): Promise<UsageCheckResult> {
   const monthYear = getCurrentMonthYear();
+  const isMockUrl = !env.NEXT_PUBLIC_SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL.includes('mock') || !env.NEXT_PUBLIC_SUPABASE_URL.startsWith('http');
 
-  try {
-    // 1. Fetch Subscription
-    const { data: sub } = await supabase.from('subscriptions').select('plan, status').eq('business_id', businessId).single();
-    const plan: SubscriptionPlan = (sub?.plan as SubscriptionPlan) || 'founding_10';
-    const limit = SUBSCRIPTION_CONVERSATION_LIMITS[plan] || 500;
+  if (!isMockUrl) {
+    try {
+      // 1. Fetch Subscription
+      const { data: sub } = await supabase.from('subscriptions').select('plan, status').eq('business_id', businessId).single();
+      const plan: SubscriptionPlan = (sub?.plan as SubscriptionPlan) || 'founding_10';
+      const limit = SUBSCRIPTION_CONVERSATION_LIMITS[plan] || 500;
 
-    // 2. Fetch Current Month Usage Stats
-    const { data: usage } = await supabase
-      .from('business_usage_stats')
-      .select('conversations_count')
-      .eq('business_id', businessId)
-      .eq('month_year', monthYear)
-      .single();
+      // 2. Fetch Current Month Usage Stats
+      const { data: usage } = await supabase
+        .from('business_usage_stats')
+        .select('conversations_count')
+        .eq('business_id', businessId)
+        .eq('month_year', monthYear)
+        .single();
 
-    const currentCount = usage?.conversations_count || 0;
+      const currentCount = usage?.conversations_count || 0;
 
-    if (currentCount >= limit) {
+      if (currentCount >= limit) {
+        return {
+          allowed: false,
+          currentCount,
+          limit,
+          plan,
+          message: `Monthly AI conversation limit reached (${currentCount}/${limit}). Upgrade your plan or contact support to resume automated AI sales.`,
+        };
+      }
+
       return {
-        allowed: false,
+        allowed: true,
         currentCount,
         limit,
         plan,
-        message: `Monthly AI conversation limit reached (${currentCount}/${limit}). Upgrade your plan or contact support to resume automated AI sales.`,
       };
+    } catch (error) {
+      console.warn('[UsageEnforcer] Supabase query fallback to mock store:', error);
     }
-
-    return {
-      allowed: true,
-      currentCount,
-      limit,
-      plan,
-    };
-  } catch (error) {
-    console.warn('[UsageEnforcer] Supabase query fallback to mock store:', error);
   }
 
   // Fallback to Mock Store check
@@ -75,35 +79,40 @@ export async function checkAndEnforceUsage(businessId: string): Promise<UsageChe
 
 export async function recordUsageIncrement(businessId: string, tokensUsed: number): Promise<void> {
   const monthYear = getCurrentMonthYear();
+  const isMockUrl = !env.NEXT_PUBLIC_SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL.includes('mock') || !env.NEXT_PUBLIC_SUPABASE_URL.startsWith('http');
 
-  try {
-    const { data: existing } = await supabase
-      .from('business_usage_stats')
-      .select('id, conversations_count, ai_tokens_used')
-      .eq('business_id', businessId)
-      .eq('month_year', monthYear)
-      .single();
-
-    if (existing) {
-      await supabase
+  if (!isMockUrl) {
+    try {
+      const { data: existing } = await supabase
         .from('business_usage_stats')
-        .update({
-          conversations_count: existing.conversations_count + 1,
-          ai_tokens_used: existing.ai_tokens_used + tokensUsed,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', existing.id);
-    } else {
-      await supabase.from('business_usage_stats').insert({
-        business_id: businessId,
-        month_year: monthYear,
-        conversations_count: 1,
-        ai_tokens_used: tokensUsed,
-        orders_count: 0,
-      });
+        .select('id, conversations_count, ai_tokens_used')
+        .eq('business_id', businessId)
+        .eq('month_year', monthYear)
+        .single();
+
+      if (existing) {
+        await supabase
+          .from('business_usage_stats')
+          .update({
+            conversations_count: existing.conversations_count + 1,
+            ai_tokens_used: existing.ai_tokens_used + tokensUsed,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', existing.id);
+      } else {
+        await supabase.from('business_usage_stats').insert({
+          business_id: businessId,
+          month_year: monthYear,
+          conversations_count: 1,
+          ai_tokens_used: tokensUsed,
+          orders_count: 0,
+        });
+      }
+      return;
+    } catch {
+      console.warn('[UsageEnforcer] Usage increment fallback to mock store');
     }
-  } catch (error) {
-    console.warn('[UsageEnforcer] Usage increment fallback to mock store');
-    mockStore.incrementUsage(businessId, tokensUsed);
   }
+
+  mockStore.incrementUsage(businessId, tokensUsed);
 }

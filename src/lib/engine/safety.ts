@@ -1,5 +1,3 @@
-import { GroundedContext } from './types';
-
 /**
  * Enforces strict Grounded Information Rules:
  * The AI sales assistant relies ONLY on verified vendor catalog, delivery, payment, and FAQ data.
@@ -16,7 +14,7 @@ CRITICAL GROUNDED INFORMATION DIRECTIVE:
 3. Keep response concise, friendly, and oriented towards helping the customer purchase their fashion items.
 `;
 
-export function verifyResponseSafety(responseContent: string, context: GroundedContext): { safe: boolean; reason?: string } {
+export function verifyResponseSafety(responseContent: string): { safe: boolean; reason?: string } {
   // Guardrail check: Verify no placeholder text or ungrounded claims
   const lower = responseContent.toLowerCase();
   
