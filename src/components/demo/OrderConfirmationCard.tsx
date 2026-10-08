@@ -51,7 +51,7 @@ export function OrderConfirmationCard({
           Confirm your order
         </h3>
 
-        <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold text-amber-800 border border-amber-200">
+        <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-bold text-amber-800 border border-amber-200">
           Pending confirmation
         </span>
       </div>
@@ -104,7 +104,7 @@ export function OrderConfirmationCard({
           type="button"
           onClick={onConfirm}
           aria-label="Confirm order button"
-          className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 active:scale-95 transition"
+          className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2 active:scale-95 transition"
         >
           Confirm order
         </button>
@@ -113,7 +113,7 @@ export function OrderConfirmationCard({
           type="button"
           onClick={onChangeDetails}
           aria-label="Change details button"
-          className="rounded-xl border border-emerald-300 bg-white px-3 py-2 text-xs font-bold text-emerald-800 hover:bg-emerald-50 active:scale-95 transition"
+          className="rounded-xl border border-emerald-300 bg-white px-3 py-2 text-xs font-bold text-emerald-800 hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2 active:scale-95 transition"
         >
           Change details
         </button>
@@ -122,7 +122,7 @@ export function OrderConfirmationCard({
           type="button"
           onClick={onCancel}
           aria-label="Cancel order button"
-          className="rounded-xl border border-gray-300 bg-white px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 active:scale-95 transition"
+          className="rounded-xl border border-gray-300 bg-white px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 active:scale-95 transition"
         >
           Cancel
         </button>
