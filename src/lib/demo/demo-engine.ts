@@ -75,7 +75,7 @@ export function createInitialActiveDraft(): ActiveDraft {
 export function isSizeCompatibleWithProduct(size: string | null | undefined, product: DemoProduct | null | undefined): boolean {
   if (!size || !product) return false;
   const cleanSize = size.trim().toUpperCase();
-  const isFootwearSize = /^(3[8-9]|4[0-5])$/.test(cleanSize);
+  const isFootwearSize = /^\d+$/.test(cleanSize);
   const isClothingSize = /^(S|M|L|XL|XXL|SMALL|MEDIUM|LARGE)$/i.test(cleanSize);
   const isFootwearProduct = product.category.toLowerCase().includes('sneaker') || 
                             product.category.toLowerCase().includes('footwear') || 
@@ -789,12 +789,17 @@ export function getDraftConfirmationKey(
 /**
  * Detects whether a message is a short contextual reply (yes/no/size/color/positional).
  */
-function isContextualReply(msg: string): boolean {
+export function isContextualReply(msg: string): boolean {
   const norm = msg.toLowerCase().trim();
 
   // Positional or relative references are ALWAYS contextual replies regardless of discovery keywords!
   if (extractPositionalIndex(norm) !== undefined || /\b(that\s+one|this\s+one|the\s+(black|white|red|gold|brown)\s+one)\b/i.test(norm)) {
     return true;
+  }
+
+  // If message mentions explicit catalog product names, it's NOT a standalone contextual reply
+  if (/\b(hoodie|hoodies|abaya|abayas|sneaker|sneakers|shoes?|gowns?|dress|dresses)\b/i.test(norm)) {
+    return false;
   }
 
   // Color/size availability query on active product ("what sizes does it have?", "do you have another color?", "do you have the white one?", "does it come in white?")
@@ -806,14 +811,12 @@ function isContextualReply(msg: string): boolean {
     /\b(do\s+you\s+have|is\s+there|does\s+it\s+come\s+in|got)\s+(the\s+)?(white|black|red|blue|gold|green|brown|purple|pink|yellow|orange|grey|gray)(\s+one)?\b/i.test(norm) ||
     /\b(white|black|red|blue|gold|green|brown|purple|pink|yellow|orange|grey|gray)\s+(one|colour|color)\b/i.test(norm) ||
     /\b(what|which)\s+sizes?\b/i.test(norm) ||
-    /\bsizes?\s+(does\s+it|do\s+you|are)\b/i.test(norm)
+    /\bsizes?\s+(does\s+it|do\s+you|are)\b/i.test(norm) ||
+    /\b(do\s+you\s+have|is\s+there|does\s+it\s+come\s+in|e\s+dey\s+in|you\s+get)\s+(in\s+)?(size\s+)?\d+\b/i.test(norm) ||
+    /\b(size\s+)?\d+\s+(available|dey)\b/i.test(norm) ||
+    /^(size\s+)?\d+$/i.test(norm)
   ) {
     return true;
-  }
-
-  // If message mentions explicit catalog product names, it's NOT a standalone contextual reply
-  if (/\b(hoodie|hoodies|abaya|abayas|sneaker|sneakers|shoes?|gowns?|dress|dresses)\b/i.test(norm)) {
-    return false;
   }
 
   // Compromise selection / Pidgin acceptance ("manage am", "i go manage", "make i manage am")
@@ -875,6 +878,17 @@ function extractPositionalIndex(msg: string): number | undefined {
   if (
     /\b(only|all)\s+(the\s+|these\s+|those\s+)?(\d+|one|two|three|four|five)\s+(goods|items|products|things)\b/i.test(norm) ||
     /\b(is\s+it|na|are\s+these|do\s+you)\s+only\s+.*\b(goods|items|products|things)\b/i.test(norm)
+  ) {
+    return undefined;
+  }
+
+  // SIZE OR EXPLICIT PRODUCT GUARD:
+  // Messages referencing explicit clothing/shoe products or sizes (e.g. "size 55", "in size 42", "sneakers size 55")
+  // MUST NOT trigger positional selection!
+  if (
+    /\bsizes?\s*[:\-]?\s*\d+\b/i.test(norm) ||
+    /\bin\s+size\b/i.test(norm) ||
+    /\b(hoodie|hoodies|abaya|abayas|sneaker|sneakers|shoes?|gowns?|dress|dresses)\b/i.test(norm)
   ) {
     return undefined;
   }
@@ -958,11 +972,17 @@ export function extractSizeFromMessage(
     return standaloneSML[1].toUpperCase();
   }
 
-  const numericMatch = normalized.match(/(?<!\d|,)\b(38|39|40|41|42|43|44|45)\b(?!\d|,|k|m)/i);
+  // Explicit numeric size phrase: "size 42", "size: 55", "in size 55", "size 30", "e dey in 55", "sizes 44"
+  const explicitSizeMatch = normalized.match(/\b(?:size|sizes?|in\s+size|fit|e\s+dey\s+in)\s*[:\-]?\s*(\d+)\b/i);
+  if (explicitSizeMatch) {
+    return explicitSizeMatch[1];
+  }
+
+  const numericMatch = normalized.match(/(?<!\d|,)\b(\d+)\b(?!\d|,|k|m)/i);
   if (numericMatch) {
     const numStr = numericMatch[1];
     const hasExplicitContext = 
-      /\b(?:size|in|take|fit)\s*[:\-]?\s*\b\d+\b/i.test(normalized) ||
+      /\b(?:size|sizes?|in|take|fit|e\s+dey\s+in)\s*[:\-]?\s*\b\d+\b/i.test(normalized) ||
       /\bdo you have\b.*\b\d+\b/i.test(normalized) ||
       /\bcome in\b.*\b\d+\b/i.test(normalized) ||
       /\bsneakers?\b.*\b\d+\b/i.test(normalized);
@@ -1336,7 +1356,7 @@ export function resolveContextualReply(
           };
         } else {
           return {
-            directResponse: `The ${product.name} currently comes in sizes ${formatListWithAnd(product.sizes)}. We don't currently have size ${sizeReply}.`,
+            directResponse: `The ${product.name} is available, but size ${sizeReply} isn't currently listed. Available sizes are ${formatListWithAnd(product.sizes)}.`,
             intent: 'AVAILABILITY_INQUIRY',
           };
         }
@@ -2478,24 +2498,32 @@ function isGibberishOrNonsense(msgText: string): boolean {
     }
   }
 
+  const productMatch = resolveCatalogProduct(userMessageText, customCatalog);
   if (!matchedProduct) {
-    const productMatch = resolveCatalogProduct(userMessageText, customCatalog);
     if (productMatch.kind !== 'unknown' && productMatch.product) {
       matchedProduct = productMatch.product;
     }
   }
 
+  const aiMessages = state.messages.filter((m) => m.sender === 'ai');
+  const lastAiText = aiMessages.length > 0 ? aiMessages[aiMessages.length - 1].text.toLowerCase() : '';
+  const aiAskedForSize = /\bwhat size|which size|preferred size|size would you like|size are you\b/i.test(lastAiText);
+  let requestedSize = extractSizeFromMessage(userMessageText, matchedProduct || (state.pendingProductId ? customCatalog.find(p => p.id === state.pendingProductId) : null), aiAskedForSize || lastAiText.includes('size'));
+
   // Fallback to pending active product or recent order product when message asks for attributes, prices, corrections, or purchase instructions
   if (!matchedProduct && (state.pendingProductId || state.orders.length > 0 || contextResolution?.resolvedProduct)) {
-    const pMatch = resolveCatalogProduct(userMessageText, customCatalog);
-    const isUnlistedProductQuery = pMatch.kind === 'unknown' && pMatch.queryTerm !== 'that item' && pMatch.queryTerm !== 'that specific item' && pMatch.queryTerm !== 'item';
+    const isSizeOrAttributeToken = requestedSize !== undefined || /^(?:size\s+)?\d+$/i.test(msg.trim()) || /^(s|m|l|xl|xxl)$/i.test(msg.trim());
+    const isUnlistedProductQuery = productMatch.kind === 'unknown' && productMatch.queryTerm !== 'that item' && productMatch.queryTerm !== 'that specific item' && productMatch.queryTerm !== 'item' && !isSizeOrAttributeToken;
     if (!isUnlistedProductQuery) {
       const activeProdId = contextResolution?.resolvedProduct?.id || state.pendingProductId || (state.orders.length > 0 ? customCatalog.find((p) => p.name === state.orders[state.orders.length - 1].productName)?.id : undefined);
       const activeProd = customCatalog.find((p) => p.id === activeProdId);
       if (activeProd) {
-        const isAttributeOrPurchase = /\b(s|m|l|xl|xxl|small|medium|large|size|sizes|color|colour|colors|colours|only|another|other|different|price|cost|how much|buy|order|take|take it|will take|give me|deliver|delivery|shipping|location|instead|actually|change|switch|reserve|keep|hold|do am|yes|collect|run|run am|do it|my choice|wan take|go collect|want this|go with)\b/i.test(msg) || /^(s|m|l|xl|xxl|38|39|40|41|42|43|44)$/i.test(msg.trim()) || Boolean(contextResolution?.isPurchaseYes);
+        const isAttributeOrPurchase = /\b(s|m|l|xl|xxl|small|medium|large|size|sizes|color|colour|colors|colours|only|another|other|different|price|cost|how much|buy|order|take|take it|will take|give me|deliver|delivery|shipping|location|instead|actually|change|switch|reserve|keep|hold|do am|yes|collect|run|run am|do it|my choice|wan take|go collect|want this|go with)\b/i.test(msg) || /^(s|m|l|xl|xxl|\d+)$/i.test(msg.trim()) || Boolean(contextResolution?.isPurchaseYes);
         if (isAttributeOrPurchase) {
           matchedProduct = activeProd;
+          if (!requestedSize) {
+            requestedSize = extractSizeFromMessage(userMessageText, matchedProduct, aiAskedForSize || lastAiText.includes('size'));
+          }
         }
       }
     }
@@ -2589,6 +2617,9 @@ function isGibberishOrNonsense(msgText: string): boolean {
 
   // 3. Extract requested attributes (color, size, price, category)
   const requestedColor = extractColorFromMessage(userMessageText);
+  if (!requestedSize && matchedProduct) {
+    requestedSize = extractSizeFromMessage(userMessageText, matchedProduct, aiAskedForSize || lastAiText.includes('size'));
+  }
 
   // Grounded Catalog Discovery vs Specific Product Match Detection
   const isCategoryDiscoveryQuery =
@@ -2620,13 +2651,8 @@ function isGibberishOrNonsense(msgText: string): boolean {
       msg.includes('what is in stock') ||
       PRICE_FILTER_PATTERN.test(msg)
     ) &&
-    (!matchedProduct || (isCategoryDiscoveryQuery && requestedColor === undefined)) &&
+    (!matchedProduct || (isCategoryDiscoveryQuery && requestedColor === undefined && requestedSize === undefined)) &&
     !(state.pendingProductId && (msg.includes('size') || msg.includes('color') || msg.includes('colour') || msg.includes('available') || msg.includes('stock') || requestedColor !== undefined));
-
-  const aiMessages = state.messages.filter((m) => m.sender === 'ai');
-  const lastAiText = aiMessages.length > 0 ? aiMessages[aiMessages.length - 1].text.toLowerCase() : '';
-  const aiAskedForSize = /\bwhat size|which size|preferred size|size would you like|size are you\b/i.test(lastAiText);
-  const requestedSize = extractSizeFromMessage(userMessageText, matchedProduct || (state.pendingProductId ? customCatalog.find(p => p.id === state.pendingProductId) : null), aiAskedForSize || lastAiText.includes('size'));
 
   const priceFilter = extractPriceFilter(msg);
   const extractedLocation = extractLocationFromMessage(userMessageText, state.lastIntent === 'PURCHASE_INTENT')?.name;
@@ -2815,7 +2841,7 @@ function isGibberishOrNonsense(msgText: string): boolean {
       responseText = `I don't currently have ${article} ${requestedColor.toLowerCase()} version of the ${matchedProduct.name} listed in the catalog. The ${matchedProduct.name} is available in ${matchedProduct.colors.join(', ')} for ${formatNaira(matchedProduct.price_ngn)}.`;
     } else if (requestedSize && matchedProduct.sizes.length > 0 && !matchedProduct.sizes.includes(requestedSize)) {
       intent = 'AVAILABILITY_INQUIRY';
-      responseText = `The ${matchedProduct.name} is available, but size ${requestedSize} isn't currently listed. Available sizes are ${matchedProduct.sizes.join(', ')}.`;
+      responseText = `The ${matchedProduct.name} is available, but size ${requestedSize} isn't currently listed. Available sizes are ${formatListWithAnd(matchedProduct.sizes)}.`;
     } else if (isExplicitPurchaseReq) {
       intent = 'PURCHASE_INTENT';
       newPendingPurchaseIntent = true;

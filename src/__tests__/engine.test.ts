@@ -2153,9 +2153,74 @@ async function runFullArchitectureVerificationSuite() {
       throw new Error(`Test 252 failed for phrase "${check.phrase}": expected intent ${check.expectedIntent}, got ${res.intent}`);
     }
   }
-  console.log('✅ [252/252] Nigerian Pidgin & Informal Language Master Test Passed: All 11 slang/Pidgin expressions ("howfar", "wetin una get", "abeg reduce am", "una dey collect transfer", "oshe", "una clothes fine") semantically resolved with 100% fidelity.');
+  console.log('✅ [252/253] Nigerian Pidgin & Informal Language Master Test Passed: All 11 slang/Pidgin expressions ("howfar", "wetin una get", "abeg reduce am", "una dey collect transfer", "oshe", "una clothes fine") semantically resolved with 100% fidelity.');
 
-  console.log('\n🎉 ALL 252 VendiAide MASTER DIRECTIVE & NIGERIAN PIDGIN TESTS PASSED 100% CLEANLY!');
+  // Test 253: Dynamic Catalog-Driven Sneaker Size Verification
+  const sneakerSizesToTest = [
+    { size: '30', available: false },
+    { size: '39', available: false },
+    { size: '40', available: true },
+    { size: '41', available: true },
+    { size: '42', available: true },
+    { size: '43', available: true },
+    { size: '44', available: true },
+    { size: '45', available: false },
+    { size: '50', available: false },
+    { size: '55', available: false },
+  ];
+
+  for (const { size, available } of sneakerSizesToTest) {
+    // 1. Direct query with product name: "Do you have sneakers in size <size>?"
+    const directRes = processDemoMessage(createInitialDemoState(), `Do you have sneakers in size ${size}?`);
+    if (directRes.intent !== 'AVAILABILITY_INQUIRY') {
+      throw new Error(`Test 253 failed: expected AVAILABILITY_INQUIRY for size ${size}, got ${directRes.intent}`);
+    }
+    if (available) {
+      if (!directRes.responseText.toLowerCase().includes('yes') || !directRes.responseText.includes(size)) {
+        throw new Error(`Test 253 failed: expected availability confirmation for size ${size}, got: ${directRes.responseText}`);
+      }
+    } else {
+      if (!directRes.responseText.includes("isn't currently listed") || !directRes.responseText.includes('40, 41, 42, 43, and 44')) {
+        throw new Error(`Test 253 failed: expected unavailable size message for size ${size}, got: ${directRes.responseText}`);
+      }
+    }
+
+    // 2. Multi-turn inquiry: "sneakers" -> "<size>"
+    const s1 = processDemoMessage(createInitialDemoState(), 'sneakers');
+    const s2 = processDemoMessage(s1.updatedState, size);
+    if (available) {
+      if (s2.intent !== 'PURCHASE_INTENT' || s2.updatedState.activeDraft?.size !== size) {
+        throw new Error(`Test 253 multi-turn failed for size ${size}: intent=${s2.intent}, draftSize=${s2.updatedState.activeDraft?.size}`);
+      }
+    } else {
+      if (s2.intent !== 'AVAILABILITY_INQUIRY' || !s2.responseText.includes("isn't currently listed")) {
+        throw new Error(`Test 253 multi-turn failed for unavailable size ${size}: intent=${s2.intent}, response=${s2.responseText}`);
+      }
+    }
+  }
+
+  // Explicit size 55 phrases
+  const size55Phrases = [
+    'I want sneakers size 55',
+    'I wan sneaker size 55',
+    'boss you get size 55 sneakers?',
+    'do you have size 55 for the sneakers?',
+  ];
+  for (const phrase of size55Phrases) {
+    const res = processDemoMessage(createInitialDemoState(), phrase);
+    if (res.intent !== 'AVAILABILITY_INQUIRY' || !res.responseText.includes("isn't currently listed")) {
+      throw new Error(`Test 253 failed for phrase "${phrase}": intent=${res.intent}, response=${res.responseText}`);
+    }
+  }
+
+  // Truly unlisted product distinction (e.g. Rolex)
+  const rolexRes = processDemoMessage(createInitialDemoState(), 'Rolex');
+  if (rolexRes.intent !== 'GENERAL_QUESTION' || !rolexRes.responseText.toLowerCase().includes("don't currently have rolex listed")) {
+    throw new Error(`Test 253 failed for unlisted product "Rolex": intent=${rolexRes.intent}, response=${rolexRes.responseText}`);
+  }
+  console.log('✅ [253/253] Dynamic Catalog Sneaker Size & Unlisted Product 3-Way Distinction Test Passed: sizes 30, 39, 40, 41, 42, 43, 44, 45, 50, 55 tested across single & multi-turn conversations.');
+
+  console.log('\n🎉 ALL 253 VendiAide MASTER DIRECTIVE & NIGERIAN PIDGIN TESTS PASSED 100% CLEANLY!');
 }
 
 runFullArchitectureVerificationSuite().catch((err) => {
