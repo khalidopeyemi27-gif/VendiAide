@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Header } from '@/components/landing/Header';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { ProblemSection } from '@/components/landing/ProblemSection';
@@ -11,21 +12,27 @@ import { PricingSection } from '@/components/landing/PricingSection';
 import { FAQSection } from '@/components/landing/FAQSection';
 import { Footer } from '@/components/landing/Footer';
 import { DemoModal } from '@/components/landing/DemoModal';
-import { ArrowRight, ShieldCheck } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 
 export default function LandingPage() {
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<string | undefined>(undefined);
+
+  const handleOpenDemoModal = (plan?: string) => {
+    setSelectedPlan(plan);
+    setIsDemoModalOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900 selection:bg-emerald-500 selection:text-white flex flex-col justify-between">
       <div>
         {/* Navigation Header */}
-        <Header onOpenDemoModal={() => setIsDemoModalOpen(true)} />
+        <Header onOpenDemoModal={() => handleOpenDemoModal()} />
 
         {/* Main Content Sections */}
         <main>
           {/* Hero Section */}
-          <HeroSection onOpenDemoModal={() => setIsDemoModalOpen(true)} />
+          <HeroSection onOpenDemoModal={() => handleOpenDemoModal()} />
 
           {/* Problem Section */}
           <ProblemSection />
@@ -40,7 +47,7 @@ export default function LandingPage() {
           <WhoItsForSection />
 
           {/* Pricing Section */}
-          <PricingSection onOpenDemoModal={() => setIsDemoModalOpen(true)} />
+          <PricingSection onOpenDemoModal={handleOpenDemoModal} />
 
           {/* FAQ Section */}
           <FAQSection />
@@ -56,15 +63,22 @@ export default function LandingPage() {
                 Ready To Turn WhatsApp Enquiries Into Orders?
               </h2>
               <p className="text-emerald-100 text-base sm:text-lg max-w-2xl mx-auto font-normal">
-                Join our founding cohort of Nigerian fashion vendors. Get white-glove setup and start automating your WhatsApp sales today.
+                Join our founding cohort of Nigerian fashion vendors. Experience grounded catalog automation and start capturing organized orders today.
               </p>
               <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
-                <button
-                  onClick={() => setIsDemoModalOpen(true)}
+                <Link
+                  href="/demo"
                   className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-white py-4 px-8 text-base font-bold text-emerald-900 shadow-xl hover:bg-emerald-50 transition"
                 >
-                  <span>Book a Free Demo</span>
-                  <ArrowRight className="h-5 w-5" />
+                  <Sparkles className="h-5 w-5 text-emerald-700" />
+                  <span>Try Interactive Demo</span>
+                </Link>
+                <button
+                  onClick={() => handleOpenDemoModal('Founding 10')}
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl border border-emerald-600 bg-emerald-800/60 py-4 px-8 text-base font-bold text-white shadow-md hover:bg-emerald-800 transition"
+                >
+                  <span>Book a Setup Call</span>
+                  <ArrowRight className="h-5 w-5 text-emerald-300" />
                 </button>
               </div>
             </div>
@@ -79,6 +93,7 @@ export default function LandingPage() {
       <DemoModal
         isOpen={isDemoModalOpen}
         onClose={() => setIsDemoModalOpen(false)}
+        selectedPlan={selectedPlan}
       />
     </div>
   );

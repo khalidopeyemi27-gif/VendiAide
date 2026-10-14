@@ -60,9 +60,9 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/signup" className="hover:text-white transition">
-                  Sign Up
-                </Link>
+                <a href="#pricing" className="hover:text-white transition">
+                  Apply for Cohort
+                </a>
               </li>
               <li>
                 <a href="#faq" className="hover:text-white transition">
@@ -75,11 +75,10 @@ export function Footer() {
         </div>
 
         <div className="border-t border-gray-800 pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 gap-4">
-          <p>© {new Date().getFullYear()} VendiAide. All rights reserved.</p>
-          <div className="flex gap-6">
-            <span>Privacy Policy</span>
-            <span>Terms of Service</span>
-          </div>
+          <p>© {new Date().getFullYear()} VendiAide AI. All rights reserved.</p>
+          <p className="text-gray-500">
+            Terms of service & privacy policies are agreed during vendor onboarding.
+          </p>
         </div>
       </div>
     </footer>

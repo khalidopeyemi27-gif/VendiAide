@@ -4,7 +4,7 @@ import React from 'react';
 import { Check, Sparkles, HelpCircle } from 'lucide-react';
 
 interface PricingSectionProps {
-  onOpenDemoModal: () => void;
+  onOpenDemoModal: (plan?: string) => void;
 }
 
 export function PricingSection({ onOpenDemoModal }: PricingSectionProps) {
@@ -71,7 +71,7 @@ export function PricingSection({ onOpenDemoModal }: PricingSectionProps) {
             </div>
 
             <button
-              onClick={onOpenDemoModal}
+              onClick={() => onOpenDemoModal('Founding 10')}
               className="w-full rounded-xl bg-emerald-600 py-3.5 px-4 text-center text-sm font-bold text-white shadow-md hover:bg-emerald-700 transition"
             >
               Apply for Founding Cohort
@@ -116,10 +116,10 @@ export function PricingSection({ onOpenDemoModal }: PricingSectionProps) {
             </div>
 
             <button
-              onClick={onOpenDemoModal}
+              onClick={() => onOpenDemoModal('Starter')}
               className="w-full rounded-xl border border-gray-300 py-3.5 px-4 text-center text-sm font-bold text-gray-800 hover:bg-gray-50 transition"
             >
-              Book a Free Demo
+              Book Starter Setup Call
             </button>
           </div>
 
@@ -161,10 +161,10 @@ export function PricingSection({ onOpenDemoModal }: PricingSectionProps) {
             </div>
 
             <button
-              onClick={onOpenDemoModal}
+              onClick={() => onOpenDemoModal('Growth')}
               className="w-full rounded-xl border border-gray-300 py-3.5 px-4 text-center text-sm font-bold text-gray-800 hover:bg-gray-50 transition"
             >
-              Book a Free Demo
+              Book Growth Setup Call
             </button>
           </div>
 

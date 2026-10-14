@@ -7,7 +7,7 @@ export function FAQSection() {
   const faqs = [
     {
       q: 'Does VendiAide support Nigerian Naira (₦)?',
-      a: 'Yes, 100%! VendiAide is built specifically for Nigerian fashion businesses. All product pricing, Lagos shipping fees (₦2,500), interstate delivery rates (₦5,000), and manual bank account transfer instructions are formatted natively in ₦ Naira.',
+      a: 'Yes, 100%! VendiAide is built specifically for Nigerian fashion businesses. Product pricing, Lagos delivery rates (₦2,500), nationwide shipping rates (₦5,000), order summaries, and payment instructions are all natively calculated and displayed in ₦ Naira.',
     },
     {
       q: 'How does catalog grounding work? Will the AI invent fake prices or sizes?',
@@ -19,7 +19,11 @@ export function FAQSection() {
     },
     {
       q: 'How long does setup take?',
-      a: 'Setup takes under 5 minutes. You simply enter your business name, delivery rates, bank account details, and add your initial 1-3 fashion products. You can test your assistant immediately in the web demo simulator.',
+      a: 'You can try the interactive demo immediately on this site with zero setup. For live store deployment, onboarding is guided: our team works with you to load your catalog, configure shipping rates, and set up your assistant so it represents your brand accurately.',
+    },
+    {
+      q: 'Does VendiAide take over my personal WhatsApp?',
+      a: 'No. VendiAide connects via official WhatsApp Business API or designated store numbers. You keep complete visibility over all conversations, and human takeover ensures you can step in at any second.',
     },
     {
       q: 'Are there any external WhatsApp or API fees?',

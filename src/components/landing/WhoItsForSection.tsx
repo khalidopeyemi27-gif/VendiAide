@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shirt, Footprints, Briefcase, Sparkles, Store } from 'lucide-react';
+import { Shirt, Footprints, Briefcase, Sparkles, Store, Scissors } from 'lucide-react';
 
 export function WhoItsForSection() {
   const verticals = [
@@ -16,7 +16,7 @@ export function WhoItsForSection() {
     {
       icon: Footprints,
       title: 'Sneakers & Footwear Vendors',
-      description: 'Sneakers, slides, heels, sandals, and shoe size mapping (EU 38 to 45).',
+      description: 'Sneakers, slides, heels, sandals, and catalog-matched footwear sizing.',
     },
     {
       icon: Briefcase,
@@ -27,6 +27,11 @@ export function WhoItsForSection() {
       icon: Store,
       title: 'Thrift & Online Fashion Boutiques',
       description: 'First-grade vintage apparel, thrift outfits, and small online Instagram shops.',
+    },
+    {
+      icon: Scissors,
+      title: 'Traditional Wear & Asoebi Brands',
+      description: 'Agbada, senatorial native sets, bespoke asoebi styles, and tailor-guided fabric consultations.',
     },
   ];
 

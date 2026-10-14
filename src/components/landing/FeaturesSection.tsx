@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Tag, Users, PackageCheck, UserCheck } from 'lucide-react';
+import { ShieldCheck, Tag, Users, PackageCheck, UserCheck, MessageSquare } from 'lucide-react';
 
 export function FeaturesSection() {
   const features = [
@@ -13,7 +13,7 @@ export function FeaturesSection() {
       icon: Tag,
       title: 'Fashion Product & ₦ Naira Native',
       description:
-        'Built for clothing sizes (S, M, L, XL, EU 38-45), colors, fabric specs, Lagos delivery rates (₦2,500), interstate rates (₦5,000), and Nigerian bank account transfers.',
+        'Handles clothing sizes, catalog footwear sizing, colorways, fabric specs, Lagos delivery rates (₦2,500), and nationwide interstate shipping rates (₦5,000).',
     },
     {
       icon: Users,
@@ -33,6 +33,12 @@ export function FeaturesSection() {
       description:
         'Take control of any conversation instantly from your dashboard whenever a customer requests custom designs or direct owner assistance.',
     },
+    {
+      icon: MessageSquare,
+      title: 'English & Nigerian Pidgin Fluency',
+      description:
+        'Seamlessly understands natural Nigerian buyer dialogue—whether customers chat in standard English, everyday Pidgin ("how much last", "abeg"), or mixed fashion slang.',
+    },
   ];
 
   return (
@@ -40,7 +46,7 @@ export function FeaturesSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-xs font-bold uppercase tracking-wider text-emerald-600 mb-2">
-            Built For Nigerian Fashion SaaS
+            Built For Nigerian Fashion Brands
           </h2>
           <p className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
             Features Tailored To Turn Enquiries Into Revenue

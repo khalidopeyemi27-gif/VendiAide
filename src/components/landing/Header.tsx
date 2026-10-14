@@ -33,7 +33,7 @@ export function Header({ onOpenDemoModal }: HeaderProps) {
             How It Works
           </a>
           <a href="#who-its-for" className="hover:text-emerald-600 transition">
-            Who&apos;s For
+            Who It&apos;s For
           </a>
           <a href="#pricing" className="hover:text-emerald-600 transition">
             Pricing
@@ -44,33 +44,33 @@ export function Header({ onOpenDemoModal }: HeaderProps) {
         </nav>
 
         {/* Action Buttons */}
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-3">
           <Link
             href="/login"
-            className="text-sm font-semibold text-gray-700 hover:text-emerald-600 transition px-3 py-2"
+            className="text-sm font-semibold text-gray-700 hover:text-emerald-600 transition px-2 py-2"
           >
-            Login
-          </Link>
-          <Link
-            href="/demo"
-            className="rounded-xl border border-gray-300 py-2.5 px-4 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
-          >
-            Try Demo
+            Vendor Login
           </Link>
           <button
             onClick={onOpenDemoModal}
+            className="rounded-xl border border-gray-300 py-2.5 px-4 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
+          >
+            Book a Setup Call
+          </button>
+          <Link
+            href="/demo"
             className="flex items-center gap-2 rounded-xl bg-emerald-600 py-2.5 px-4 text-sm font-semibold text-white shadow-md hover:bg-emerald-700 transition"
           >
             <Sparkles className="h-4 w-4" />
-            <span>Book a Free Demo</span>
-          </button>
+            <span>Try Interactive Demo</span>
+          </Link>
         </div>
 
         {/* Mobile Hamburger Button */}
         <div className="flex md:hidden items-center gap-2">
           <Link
             href="/demo"
-            className="rounded-lg border border-gray-200 py-1.5 px-3 text-xs font-semibold text-gray-800"
+            className="rounded-lg bg-emerald-600 py-1.5 px-3 text-xs font-semibold text-white shadow-xs"
           >
             Try Demo
           </Link>
@@ -107,7 +107,7 @@ export function Header({ onOpenDemoModal }: HeaderProps) {
               onClick={() => setMobileMenuOpen(false)}
               className="py-2 border-b border-gray-50"
             >
-              Who&apos;s For
+              Who It&apos;s For
             </a>
             <a
               href="#pricing"
@@ -125,19 +125,27 @@ export function Header({ onOpenDemoModal }: HeaderProps) {
             </a>
           </nav>
           <div className="pt-2 flex flex-col gap-2">
+            <Link
+              href="/demo"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-center text-sm font-semibold text-white shadow-md hover:bg-emerald-700 transition"
+            >
+              <Sparkles className="h-4 w-4" />
+              <span>Try Interactive Demo</span>
+            </Link>
             <button
               onClick={() => {
                 setMobileMenuOpen(false);
                 onOpenDemoModal();
               }}
-              className="w-full rounded-xl bg-emerald-600 py-3 text-center text-sm font-semibold text-white shadow-md"
+              className="w-full rounded-xl border border-gray-300 py-2.5 text-center text-sm font-semibold text-gray-800 hover:bg-gray-50 transition"
             >
-              Book a Free Demo
+              Book a Setup Call
             </button>
             <Link
               href="/login"
               onClick={() => setMobileMenuOpen(false)}
-              className="w-full rounded-xl border border-gray-200 py-2.5 text-center text-sm font-semibold text-gray-700"
+              className="w-full py-2 text-center text-xs font-semibold text-gray-600 hover:text-emerald-600 transition"
             >
               Vendor Login
             </Link>

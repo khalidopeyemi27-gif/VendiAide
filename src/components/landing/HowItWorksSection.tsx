@@ -8,21 +8,21 @@ export function HowItWorksSection() {
       icon: Upload,
       title: 'Upload Catalog & Rates',
       description:
-        'Add your fashion items with prices in ₦ Naira, available sizes, colours, stock status, Lagos/interstate shipping rates, and bank account details.',
+        'Add your fashion items with prices in ₦ Naira, available sizes, colours, stock status, delivery policies, and Lagos/interstate shipping rates.',
     },
     {
       number: '02',
       icon: Bot,
       title: 'Activate Grounded AI Assistant',
       description:
-        'Your AI sales assistant learns your exact products and FAQs. It responds instantly to buyers using strictly verified vendor facts — no invented details.',
+        'Your AI sales assistant is configured with your exact products and store rules. It responds accurately to customer inquiries using verified facts—never making up prices or unlisted stock.',
     },
     {
       number: '03',
       icon: ShoppingCart,
       title: 'Auto-Capture Leads & Orders',
       description:
-        'When customers express buying intent, the AI logs their preferred item, size, color, and delivery location into your structured dashboard.',
+        'When buyers confirm purchase details, the assistant captures their item specifications, customer details, and delivery destination into your structured order queue.',
     },
   ];
 
@@ -37,7 +37,7 @@ export function HowItWorksSection() {
             How VendiAide Works For Your Store
           </p>
           <p className="mt-4 text-base text-gray-600">
-            Set up your AI sales assistant in under 5 minutes. No coding or complex technical setup required.
+            Test our interactive demo instantly today. Live store WhatsApp onboarding is guided and handled white-glove by our team without complex coding.
           </p>
         </div>
 
